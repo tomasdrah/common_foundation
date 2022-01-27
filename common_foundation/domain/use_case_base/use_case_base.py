@@ -38,7 +38,7 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
     def output_factory(self) -> Callable[[TO], any]:
         raise NotImplementedError
 
-    def create_input(self, value: TI, *args, type: TFCE = None) -> TI | TFCE:
+    def create_input(self, value: TI, *args) -> TI :
         if not isinstance(value, tuple):
             value = (value,)
         try:
@@ -46,7 +46,7 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
         except Exception as exc:
             raise Exception(f"Error: Input creation error. Input values:{[*value, *args]} , exc_msg: {exc}")
 
-    def create_output(self, value: TO, *args, type: TFCE = None) -> TO | TFCE:
+    def create_output(self, value: TO, *args) -> TO:
         if not isinstance(value, tuple):
             value = (value,)
         try:
@@ -88,3 +88,8 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
 
     def create_response(self, msg: TO = None, success=True) -> ResponseObject[TO]:
         return ResponseObject(success=success, msg=msg)
+
+    def create_present_output(self, *args):
+        output_dto = self.create_output(*args)
+        self.present_output_boundary(output_dto)
+        return self.create_response(msg=output_dto)
