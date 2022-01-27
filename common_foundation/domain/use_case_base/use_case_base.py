@@ -13,8 +13,6 @@ from common_foundation.domain.use_case_base.response_object import ResponseObjec
 # generic
 TI = TypeVar('TI')
 TO = TypeVar('TO')
-# for generic fce
-TFCE = TypeVar('TFCE')
 
 
 class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
@@ -23,22 +21,30 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
         self.event_recorders: list[IEventRecorder] = []
         self._output_boundaries: list[IPresenter[TO]] = []
         self.logger = logging.getLogger(__name__)
+        self._input_factory = None
+        self._output_factory = None
 
     @property
     def output_boundaries(self) -> list[IPresenter[TO]]:
         return self._output_boundaries
 
     @property
-    @abc.abstractmethod
     def input_factory(self) -> Callable[[TI], any]:
-        raise NotImplementedError
+        return self._input_factory
+
+    @input_factory.setter
+    def input_factory(self, value):
+        self._input_factory = value
 
     @property
-    @abc.abstractmethod
     def output_factory(self) -> Callable[[TO], any]:
-        raise NotImplementedError
+        return self._output_factory
 
-    def create_input(self, value: TI, *args) -> TI :
+    @output_factory.setter
+    def output_factory(self, value):
+        self._output_factory = value
+
+    def create_input(self, value: TI, *args) -> TI:
         if not isinstance(value, tuple):
             value = (value,)
         try:
