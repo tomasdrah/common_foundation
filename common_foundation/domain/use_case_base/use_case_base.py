@@ -13,6 +13,8 @@ from common_foundation.domain.use_case_base.response_object import ResponseObjec
 # generic
 TI = TypeVar('TI')
 TO = TypeVar('TO')
+# for generic fce
+TFCE = TypeVar('TFCE')
 
 
 class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
@@ -36,7 +38,7 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
     def output_factory(self) -> Callable[[TO], any]:
         raise NotImplementedError
 
-    def create_input(self, value: TI, *args) -> any:
+    def create_input(self, value: TI, *args, type: TFCE = None) -> TI | TFCE:
         if not isinstance(value, tuple):
             value = (value,)
         try:
@@ -44,7 +46,7 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
         except Exception as exc:
             raise Exception(f"Error: Input creation error. Input values:{[*value, *args]} , exc_msg: {exc}")
 
-    def create_output(self, value: TO, *args) -> any:
+    def create_output(self, value: TO, *args, type: TFCE = None) -> TO | TFCE:
         if not isinstance(value, tuple):
             value = (value,)
         try:
