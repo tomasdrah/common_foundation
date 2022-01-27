@@ -20,7 +20,8 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    packages=['common_foundation'],
+    packages=1,
+    # packages=['common_foundation'],
     # install_requires=['requests'],
-    python_requires=">=3.10",
-)
+    python_requires = ">=3.10",
+    )
