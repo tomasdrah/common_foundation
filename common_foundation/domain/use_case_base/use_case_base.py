@@ -1,6 +1,6 @@
 import abc
 import logging
-from typing import TypeVar, Generic
+from typing import TypeVar, Generic, Callable
 
 from common_foundation.domain.event_recorder import IEventRecorder
 from common_foundation.domain.events.i_event import IEvent
@@ -26,22 +26,39 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
     def output_boundaries(self) -> list[IPresenter[TO]]:
         return self._output_boundaries
 
+    @property
+    @abc.abstractmethod
+    def input_factory(self) -> Callable[[TI], any]:
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def output_factory(self) -> Callable[[TO], any]:
+        raise NotImplementedError
+
+    def create_input(self, value: TI, *args) -> any:
+        if not isinstance(value, tuple):
+            value = (value,)
+        try:
+            return self.input_factory(*value, *args)
+        except Exception as exc:
+            raise Exception(f"Error: Input creation error. Input values:{[*value, *args]} , exc_msg: {exc}")
+
+    def create_output(self, value: TO, *args) -> any:
+        if not isinstance(value, tuple):
+            value = (value,)
+        try:
+            return self.output_factory(*value, *args)
+        except Exception as exc:
+            raise Exception(f"Error: Output creation error. Input values:{[*value, *args]} , exc_msg: {exc}")
+
     def execute(self, request_object: TI) -> ResponseObject[TO]:
         try:
-            input_object = self._create_input(request_object)
+            input_object = self.create_input(request_object)
             return self.process_request(input_object)
         except Exception as exc:
             self.handle_exception(exc)
             return self.create_response(success=False)
-
-    def _create_input(self, request_object: TI):
-        try:
-            if not isinstance(request_object, tuple):
-                request_object = (request_object,)
-            result = self.create_input(request_object)
-            return result
-        except Exception as exc:
-            raise Exception(f"Error: Bad request object, object: {request_object}, exc_msg: {exc}")
 
     @abc.abstractmethod
     def process_request(self, request_object) -> ResponseObject[TO]:
@@ -69,8 +86,3 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
 
     def create_response(self, msg: TO = None, success=True) -> ResponseObject[TO]:
         return ResponseObject(success=success, msg=msg)
-
-    @staticmethod
-    @abc.abstractmethod
-    def create_input(value: TI) -> any:
-        pass
