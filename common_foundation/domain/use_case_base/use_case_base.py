@@ -85,8 +85,8 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
         for handler in self.exception_handlers:
             try:
                 handler.call(exc)
-            except Exception as exc:
-                self.logger.error(f"Error: Something went wrong with exception_handler: {handler}, exc_msg: {exc}")
+            except Exception as loc_exc:
+                self.logger.error(f"Error: Something went wrong with exception_handler: {handler}, exc_msg: {loc_exc}")
 
     def record_event(self, event: IEvent):
         for recorder in self.event_recorders:
