@@ -96,6 +96,8 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
         return ResponseObject(success=success, msg=msg)
 
     def create_present_output(self, *args):
+        if len(args) == 0:
+            args = ((),)
         output_dto = self.create_output(*args)
         self.present_output_boundary(output_dto)
         return self.create_response(msg=output_dto)
