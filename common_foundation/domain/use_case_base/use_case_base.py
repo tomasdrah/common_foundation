@@ -1,5 +1,6 @@
 import abc
 import logging
+import traceback
 from typing import TypeVar, Generic, Callable
 
 from common_foundation.domain.event_recorder import IEventRecorder
@@ -50,7 +51,8 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
         try:
             return self.input_factory(*value, *args)
         except Exception as exc:
-            raise Exception(f"Error: Input creation error. Input values:{[*value, *args]} , exc_msg: {exc}")
+            exc_msg = traceback.format_tb(exc.__traceback__)
+            raise Exception(f"Error: Input creation error. Input values:{[*value, *args]} , exc_msg: {exc_msg}")
 
     def create_output(self, value: TO, *args) -> TO:
         if not isinstance(value, tuple):
@@ -58,7 +60,8 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
         try:
             return self.output_factory(*value, *args)
         except Exception as exc:
-            raise Exception(f"Error: Output creation error. Input values:{[*value, *args]} , exc_msg: {exc}")
+            exc_msg = traceback.format_tb(exc.__traceback__)
+            raise Exception(f"Error: Output creation error. Input values:{[*value, *args]} , exc_msg: {exc_msg}")
 
     def execute(self, request_object: TI) -> ResponseObject[TO]:
         try:
@@ -86,7 +89,8 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
             try:
                 handler.call(exc)
             except Exception as loc_exc:
-                self.logger.error(f"Error: Something went wrong with exception_handler: {handler}, exc_msg: {loc_exc}")
+                exc_msg = traceback.format_tb(exc.__traceback__)
+                self.logger.error(f"Error: Something went wrong with exception_handler: {handler}, exc_msg: {exc_msg}")
 
     def record_event(self, event: IEvent):
         for recorder in self.event_recorders:
