@@ -1,4 +1,7 @@
 from typing import TypeVar, Generic, Callable
+
+from common_foundation.domain.observer.basic_observer import BasicObserver
+
 from common_foundation.domain.observer.i_observer_subject import IObserverSubject
 from common_foundation.domain.observer.i_observer import IObserver
 
@@ -6,9 +9,9 @@ T = TypeVar('T')
 
 
 class BasicObserverSubject(Generic[T], IObserverSubject[T]):
-    def __init__(self, observer_factory: Callable[[Callable[[T], any]], IObserver[T]]):
+    def __init__(self, observer_factory: Callable[[Callable[[T], any]], IObserver[T]] = None):
         self._observers: list[IObserver[T]] = []
-        self.observer_factory = observer_factory
+        self.observer_factory = observer_factory if observer_factory else BasicObserver
 
     def attach(self, observer: IObserver[T]):
         self._observers.append(observer)
