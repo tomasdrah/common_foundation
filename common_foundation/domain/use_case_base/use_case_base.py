@@ -51,7 +51,7 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
         try:
             return self.input_factory(*value, *args)
         except Exception as exc:
-            exc_msg = traceback.format_tb(exc.__traceback__)
+            exc_msg ="".join(traceback.TracebackException.from_exception(exc).format())
             raise Exception(f"Error: Input creation error. Input values:{[*value, *args]} , exc_msg: {exc_msg}")
 
     def create_output(self, value: TO, *args) -> TO:
@@ -60,7 +60,7 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
         try:
             return self.output_factory(*value, *args)
         except Exception as exc:
-            exc_msg = traceback.format_tb(exc.__traceback__)
+            exc_msg ="".join(traceback.TracebackException.from_exception(exc).format())
             raise Exception(f"Error: Output creation error. Input values:{[*value, *args]} , exc_msg: {exc_msg}")
 
     def execute(self, request_object: TI) -> ResponseObject[TO]:
@@ -89,7 +89,7 @@ class UseCaseBase(Generic[TI, TO], IExecute[TI, TO]):
             try:
                 handler.call(exc)
             except Exception as loc_exc:
-                exc_msg = traceback.format_tb(exc.__traceback__)
+                exc_msg ="".join(traceback.TracebackException.from_exception(exc).format())
                 self.logger.error(f"Error: Something went wrong with exception_handler: {handler}, exc_msg: {exc_msg}")
 
     def record_event(self, event: IEvent):
